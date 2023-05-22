@@ -45,3 +45,10 @@ jobs:
       - name: Artifact does not exist
         if: steps.check_files.outputs.files_exists == 'false'
         run: exit 1
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files:
+            spark/spark-3.4.1-SNAPSHOT-bin-custom-spark.tgz
