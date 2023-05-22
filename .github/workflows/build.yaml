@@ -1,0 +1,51 @@
+name: Test Build
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+  schedule:
+    - cron: '53 0 * * *' # Daily at 00:53 UTC
+  workflow_call:
+
+jobs:
+  build:
+    name: Build project
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 8
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v21
+        with:
+          repositories: '[{ "id": "jfrog", "url": "${{ secrets.REPO_URL }}" }]'
+          plugin_repositories: '[{ "id": "jfrogplugin", "url": "${{ secrets.REPO_URL }}" }]'
+          servers: '[{ "id": "jfrog", "username": "${{ secrets.USERNAME }}" , "password": "${{ secrets.PASSWORD }}" }]'
+          mirrors: '[{ "id": "jfrog", "mirrorOf": "*", "url": "${{ secrets.REPO_URL }}", "name": "jfrog" }]'
+
+      - name: Checkout spark from upstream
+        run: git clone https://github.com/apache/spark.git; cd spark; git checkout branch-3.4
+      - name: ls1
+        run: ls
+      - name: Build from source
+        run: ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Pmesos -Pyarn -Pkubernetes
+      - name ls2
+        run: ls
+      - name: Check artifact existence
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+          files: "spark/spark-3.3.3-SNAPSHOT-bin-custom-spark.tgz"
+      - name: Artifact exists
+        if: steps.check_files.outputs.files_exists == 'true'
+        run: echo "It exists !"
+      - name: Artifact does not exist
+        if: steps.check_files.outputs.files_exists == 'false'
+        run: exit 1
