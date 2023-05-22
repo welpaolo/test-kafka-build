@@ -32,10 +32,8 @@ jobs:
 
       - name: Checkout spark from upstream
         run: git clone https://github.com/apache/spark.git; cd spark; git checkout branch-3.4
-      - name: ls1
-        run: ls
       - name: Build from source
-        run: ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Pmesos -Pyarn -Pkubernetes
+        run: cd spark; ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Pmesos -Pyarn -Pkubernetes
       - name: ls2
         run: ls
       - name: Check artifact existence
