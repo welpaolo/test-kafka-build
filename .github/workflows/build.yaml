@@ -40,7 +40,7 @@ jobs:
         id: check_files
         uses: andstor/file-existence-action@v1
         with:
-          files: "spark/spark-3.3.3-SNAPSHOT-bin-custom-spark.tgz"
+          files: "spark/spark-3.4.1-SNAPSHOT-bin-custom-spark.tgz"
       - name: Artifact exists
         if: steps.check_files.outputs.files_exists == 'true'
         run: echo "It exists !"
