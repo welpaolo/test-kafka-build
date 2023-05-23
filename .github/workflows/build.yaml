@@ -45,6 +45,10 @@ jobs:
       - name: Artifact does not exist
         if: steps.check_files.outputs.files_exists == 'false'
         run: exit 1
+      - name: Add tag
+        run: | 
+          TAG=0.0.1
+          echo $TAG
       - name: Create Github Release
         uses: softprops/action-gh-release@v1
         env:
