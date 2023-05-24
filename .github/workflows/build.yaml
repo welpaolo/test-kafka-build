@@ -46,4 +46,4 @@ jobs:
         if: steps.check_files.outputs.files_exists == 'false'
         run: exit 1
       - name: Publish to artifactory
-        run: curl -u ${{ secrets.USERNAME }}:${{ secrets.UPLOAD_PASSWORD }} -k -X PUT ${{ secrets.UPLOAD_REPO_URL }}/spark-3.4.1-SNAPSHOT-bin-custom-spark.tgz -T spark/spark-3.4.1-SNAPSHOT-bin-custom-spark.tgz -H "X-Explode-Archive: true"
+        run: curl -u ${{ secrets.USERNAME }}:${{ secrets.UPLOAD_PASSWORD }} -k -X PUT ${{ secrets.UPLOAD_REPO_URL }}/spark-3.4.1-SNAPSHOT-bin-custom-spark.tgz -T spark/spark-3.4.1-SNAPSHOT-bin-custom-spark.tgz -H 'X-Explode-Archive: true'
