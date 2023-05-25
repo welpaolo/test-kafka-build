@@ -30,43 +30,43 @@ jobs:
           path: downloads
       - name: Debug
         run: exit 0
-#  build:
-#    name: Build project
-#    runs-on: ubuntu-22.04
-#    timeout-minutes: 90
-#    needs: archive-build-artifacts
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v3
-#      - uses: actions/setup-java@v3
-#        with:
-#          distribution: temurin
-#          java-version: 8
-#      - name: maven-settings-xml-action
-#        uses: whelk-io/maven-settings-xml-action@v21
-#        with:
-#          repositories: '[{ "id": "jfrog", "url": "${{ secrets.REPO_URL }}" }]'
-#          plugin_repositories: '[{ "id": "jfrogplugin", "url": "${{ secrets.REPO_URL }}" }]'
-#          servers: '[{ "id": "jfrog", "username": "${{ secrets.USERNAME }}" , "password": "${{ secrets.PASSWORD }}" }]'
-#          mirrors: '[{ "id": "jfrog", "mirrorOf": "*", "url": "${{ secrets.REPO_URL }}", "name": "jfrog" }]'
-#
-#      - name: Checkout spark from upstream
-#        run: git clone https://github.com/apache/spark.git; cd spark; git checkout tags/v3.4.0
-#      - name: Build from source
-#        run: cd spark; ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Pmesos -Pyarn -Pkubernetes
-#      - name: Check artifact existence
-#        id: check_files
-#        uses: andstor/file-existence-action@v1
-#        with:
-#          files: "spark/spark-3.4.0-SNAPSHOT-bin-custom-spark.tgz"
-#      - name: Artifact exists
-#        if: steps.check_files.outputs.files_exists == 'true'
-#        run: echo "It exists !"
-#      - name: Artifact does not exist
-#        if: steps.check_files.outputs.files_exists == 'false'
-#        run: exit 1
-#      - name: Release build package
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: spark-build
-#          path: spark/spark-3.4.0-bin-custom-spark.tgz
+  build:
+    name: Build project
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    needs: archive-build-artifacts
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 8
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v21
+        with:
+          repositories: '[{ "id": "jfrog", "url": "${{ secrets.REPO_URL }}" }]'
+          plugin_repositories: '[{ "id": "jfrogplugin", "url": "${{ secrets.REPO_URL }}" }]'
+          servers: '[{ "id": "jfrog", "username": "${{ secrets.USERNAME }}" , "password": "${{ secrets.PASSWORD }}" }]'
+          mirrors: '[{ "id": "jfrog", "mirrorOf": "*", "url": "${{ secrets.REPO_URL }}", "name": "jfrog" }]'
+
+      - name: Checkout spark from upstream
+        run: git clone https://github.com/apache/spark.git; cd spark; git checkout tags/v3.4.0
+      - name: Build from source
+        run: cd spark; ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Pmesos -Pyarn -Pkubernetes
+      - name: Check artifact existence
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+          files: "spark/spark-3.4.0-SNAPSHOT-bin-custom-spark.tgz"
+      - name: Artifact exists
+        if: steps.check_files.outputs.files_exists == 'true'
+        run: echo "It exists !"
+      - name: Artifact does not exist
+        if: steps.check_files.outputs.files_exists == 'false'
+        run: exit 1
+      - name: Release build package
+        uses: actions/upload-artifact@v2
+        with:
+          name: spark-build
+          path: spark/spark-3.4.0-bin-custom-spark.tgz
