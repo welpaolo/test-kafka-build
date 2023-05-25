@@ -28,7 +28,8 @@ jobs:
         with:
           name: assets-for-download
           path: downloads
-
+      - name: Debug
+        run: exit 0
   build:
     name: Build project
     runs-on: ubuntu-22.04
@@ -68,4 +69,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: spark-build
-          path: spark/spark-3.4.0-SNAPSHOT-bin-custom-spark.tgz
+          path: spark/spark-3.4.0-bin-custom-spark.tgz
