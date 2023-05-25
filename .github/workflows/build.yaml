@@ -15,7 +15,6 @@ jobs:
     name: Build project
     runs-on: ubuntu-22.04
     timeout-minutes: 90
-    needs: archive-build-artifacts
     steps:
       - name: Checkout
         uses: actions/checkout@v3
