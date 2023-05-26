@@ -1,14 +1,18 @@
-name: Test Build
+name: Test Build and publish
+
+env:
+  BRANCH: ${{ github.ref_name }}
+  VERSION: 3.4.0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 on:
-  pull_request:
+  push:
   schedule:
-    - cron: '53 0 * * *' # Daily at 00:53 UTC
-  workflow_call:
+    tags:
+      - 'v*'
 
 jobs:
   build-spark:
@@ -45,8 +49,17 @@ jobs:
       - name: Artifact does not exist
         if: steps.check_files.outputs.files_exists == 'false'
         run: exit 1
-      - name: Release build package
-        uses: actions/upload-artifact@v2
+      - name: Check if tag version matches project version
+        run: |
+          if [[ "$BRANCH" != "v$VERSION" ]]; then exit 1; fi
+      - name: Add version to environment vars
+        run: |
+          echo "PROJECT_VERSION=${{ env.VERSION }}" >> $GITHUB_ENV
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: spark-build
-          path: spark/spark-3.4.0-bin-custom-spark.tgz
+          files: |
+            spark/spark-3.4.0-bin-custom-spark.tgz
+
