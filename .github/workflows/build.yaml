@@ -34,14 +34,14 @@ jobs:
           mirrors: '[{ "id": "jfrog", "mirrorOf": "*", "url": "${{ secrets.REPO_URL }}", "name": "jfrog" }]'
 
       - name: Checkout spark from upstream
-        run: git clone https://github.com/apache/spark.git; cd spark; git checkout tags/v3.4.0
+        run: git clone https://github.com/apache/spark.git; cd spark; git checkout tags/v3.4.1
       - name: Build from source
         run: cd spark; ./dev/make-distribution.sh --name custom-spark --pip --tgz -Pkubernetes
       - name: Check artifact existence
         id: check_files
         uses: andstor/file-existence-action@v1
         with:
-          files: "spark/spark-3.4.0-bin-custom-spark.tgz"
+          files: "spark/spark-3.4.1-bin-custom-spark.tgz"
       - name: Artifact exists
         if: steps.check_files.outputs.files_exists == 'true'
         run: echo "It exists !"
@@ -60,5 +60,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: |
-            spark/spark-3.4.0-bin-custom-spark.tgz
+            spark/spark-3.4.1-bin-custom-spark.tgz
 
