@@ -2,7 +2,7 @@ name: Test Build and publish
 
 env:
   BRANCH: ${{ github.ref_name }}
-  VERSION: 3.4.0
+  VERSION: 3.4.1
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
