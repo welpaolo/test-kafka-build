@@ -1,0 +1,64 @@
+name: Test Build and publish
+
+env:
+  BRANCH: ${{ github.ref_name }}
+  VERSION: 3.4.1
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-spark:
+    name: Build project
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 8
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v21
+        with:
+          repositories: '[{ "id": "jfrog", "url": "${{ secrets.REPO_URL }}" }]'
+          plugin_repositories: '[{ "id": "jfrogplugin", "url": "${{ secrets.REPO_URL }}" }]'
+          servers: '[{ "id": "jfrog", "username": "${{ secrets.USERNAME }}" , "password": "${{ secrets.PASSWORD }}" }]'
+          mirrors: '[{ "id": "jfrog", "mirrorOf": "*", "url": "${{ secrets.REPO_URL }}", "name": "jfrog" }]'
+
+      - name: Checkout spark from upstream
+        run: git clone https://github.com/apache/spark.git; cd spark; git checkout tags/v3.4.1
+      - name: Build from source
+        run: cd spark; ./dev/make-distribution.sh --name custom-spark --pip --tgz -Pkubernetes
+      - name: Check artifact existence
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+          files: "spark/spark-3.4.1-bin-custom-spark.tgz"
+      - name: Artifact exists
+        if: steps.check_files.outputs.files_exists == 'true'
+        run: echo "It exists !"
+      - name: Artifact does not exist
+        if: steps.check_files.outputs.files_exists == 'false'
+        run: exit 1
+      - name: Check if tag version matches project version
+        run: |
+          if [[ "$BRANCH" != "v$VERSION" ]]; then exit 1; fi
+      - name: Add version to environment vars
+        run: |
+          echo "PROJECT_VERSION=${{ env.VERSION }}" >> $GITHUB_ENV
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            spark/spark-3.4.1-bin-custom-spark.tgz
+
